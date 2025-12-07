@@ -1,0 +1,96 @@
+name: Build K Download Manager APK
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          git zip unzip openjdk-8-jdk python3-pip autoconf libtool pkg-config \
+          zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake \
+          libffi-dev libssl-dev build-essential ccache m4 libtool \
+          libncurses5:i386 libstdc++6:i386 zlib1g:i386
+    
+    - name: Set up Java 8
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '8'
+    
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install buildozer cython==0.29.33
+        pip install kivy kivymd requests certifi
+    
+    - name: Cache buildozer global directory
+      uses: actions/cache@v3
+      with:
+        path: .buildozer_global
+        key: buildozer-global-${{ hashFiles('buildozer.spec') }}
+    
+    - name: Cache buildozer directory
+      uses: actions/cache@v3
+      with:
+        path: .buildozer
+        key: buildozer-${{ hashFiles('buildozer.spec') }}
+    
+    - name: Build APK with Buildozer
+      run: |
+        # Accept Android SDK licenses
+        yes | buildozer android debug
+      env:
+        ANDROID_SDK_ROOT: /opt/android-sdk
+    
+    - name: Upload APK artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: K-Download-Manager-APK
+        path: bin/*.apk
+        retention-days: 30
+    
+    - name: Create Release (on tag)
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: bin/*.apk
+        name: K Download Manager ${{ github.ref_name }}
+        body: |
+          ## K Download Manager APK
+          
+          **Features:**
+          - Multi-threaded downloads (up to 256 threads)
+          - Pause/Resume functionality
+          - Modern Material Design UI
+          - Real-time progress tracking
+          - Cross-platform support
+          
+          **Installation:**
+          1. Download the APK file
+          2. Enable "Install from unknown sources" in Android settings
+          3. Install the APK
+          
+          **Requirements:**
+          - Android 5.0+ (API 21+)
+          - Internet permission
+          - Storage permission
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
