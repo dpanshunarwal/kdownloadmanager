@@ -29,16 +29,16 @@ orientation = portrait
 fullscreen = 0
 
 # (int) Target Android API, should be as high as possible.
-android.api = 33
+android.api = 31
 
 # (int) Minimum API your APK / AAB will support.
 android.minapi = 21
 
 # (str) Android NDK version to use
-android.ndk = 25b
+android.ndk = 23c
 
 # (int) Android SDK version to use
-android.sdk = 33
+android.sdk = 31
 
 # (str) Android entry point, default is ok for Kivy-based app
 android.entrypoint = org.kivy.android.PythonActivity
@@ -48,6 +48,12 @@ android.activity_class_name = org.kivy.android.PythonActivity
 
 # (str) Full name including package path of the Java class that implements Python Service
 android.service_class_name = org.kivy.android.PythonService
+
+# (str) Android app theme, default is ok (can be customized)
+android.theme = "@android:style/Theme.NoTitleBar"
+
+# (bool) Accept SDK license
+android.accept_sdk_license = True
 
 # (list) Permissions
 android.permissions = INTERNET,WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE

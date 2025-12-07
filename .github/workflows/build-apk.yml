@@ -56,6 +56,23 @@ jobs:
         path: .buildozer
         key: buildozer-${{ hashFiles('buildozer.spec') }}
     
+    - name: Accept Android SDK licenses
+      run: |
+        mkdir -p $HOME/.android
+        echo 'count=0' > $HOME/.android/repositories.cfg
+        
+        # Pre-accept all Android SDK licenses
+        mkdir -p $HOME/.buildozer/android/platform/android-sdk/licenses
+        echo "8933bad161af4178b1185d1a37fbf41ea5269c55" > $HOME/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
+        echo "d56f5187479451eabf01fb78af6dfcb131a6481e" >> $HOME/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
+        echo "24333f8a63b6825ea9c5514f83c2829b004d1fee" >> $HOME/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
+        echo "84831b9409646a918e30573bab4c9c91346d8abd" > $HOME/.buildozer/android/platform/android-sdk/licenses/android-sdk-preview-license
+        echo "504667f4c0de7af1a06de9f4b1727b84351f2910" > $HOME/.buildozer/android/platform/android-sdk/licenses/android-googletv-license
+        echo "33b6a2b64607f11b759f320ef9dff4ae5c47d97a" > $HOME/.buildozer/android/platform/android-sdk/licenses/google-gdk-license
+        echo "d975f751698a77b662f1254ddbeed3901e976f5a" > $HOME/.buildozer/android/platform/android-sdk/licenses/intel-android-extra-license
+        echo "601085b94cd77f0b54ff86406957099ebe79c4d6" > $HOME/.buildozer/android/platform/android-sdk/licenses/android-googletv-license
+        echo "8403addf88ab4874007e1c1e80a0025bf2550a37" > $HOME/.buildozer/android/platform/android-sdk/licenses/mips-android-sysimage-license
+
     - name: Build APK with Buildozer
       run: |
         # Set environment variables
@@ -63,10 +80,11 @@ jobs:
         export ANDROID_HOME=$ANDROID_SDK_ROOT
         export PATH=$PATH:$ANDROID_SDK_ROOT/tools:$ANDROID_SDK_ROOT/platform-tools
         
-        # Build APK
-        buildozer android debug
+        # Build APK with verbose output
+        buildozer -v android debug
       env:
         PYTHONUNBUFFERED: 1
+        ANDROID_ACCEPT_SDK_LICENSE: y
     
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4
